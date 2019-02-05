@@ -4,6 +4,8 @@ using Gadfly
 using LightGraphs
 using GraphPlot, Compose
 using Colors
+using Misc
+
 
 params = Dict(
     "N" => 20,
@@ -12,7 +14,7 @@ params = Dict(
 )
 
 println("Running SriMilG...")
-if length(ARGS) == 2
+if length(ARGS) == 4
     using_defaults = false
     params["N"] = ARGS[1]
     params["openness"] = ARGS[2]
@@ -43,15 +45,15 @@ gplot(graph,
     nodefillc=colors)
 
 for iter in 1:num_iter
-    println("Iteration $(iter)...")
+    pr("Iteration $(iter)...")
     node1 = rand(1:N)
     if rand(Float16) < openness
         # Choose from the graph at large.
         node2 = rand(filter(x->x!=node1,1:N))
-        println("$(node1), and at-large $(node2)")
+        pr("$(node1), and at-large $(node2)")
     else
         # Choose from a neighbor.
         node2 = rand(neighbors(graph,node1))
-        println("$(node1), and neighbor $(node2)")
+        pr("$(node1), and neighbor $(node2)")
     end
 end
