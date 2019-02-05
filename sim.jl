@@ -1,5 +1,10 @@
 #!/usr/bin/env julia
 
+using Gadfly
+using LightGraphs
+using GraphPlot, Compose
+using Colors
+
 println("Running SriMilG...")
 if length(ARGS) == 2
     defaults = false
@@ -15,3 +20,9 @@ end
 
 println("Using " * (defaults ? "defaults" : "") *
     " (N=$(N), openness=$(openness))...")
+
+graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
+gplot(graph, 
+    nodelabel=1:N,
+    NODESIZE=.08,
+    nodefillc=colorant"red")
