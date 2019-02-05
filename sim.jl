@@ -21,8 +21,10 @@ end
 println("Using " * (defaults ? "defaults" : "") *
     " (N=$(N), openness=$(openness))...")
 
+colors = rand((colorant"lightblue",colorant"red"), N)
+
 graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
 gplot(graph, 
     nodelabel=1:N,
     NODESIZE=.08,
-    nodefillc=colorant"red")
+    nodefillc=colors)
