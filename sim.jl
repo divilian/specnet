@@ -3,7 +3,6 @@
 using Gadfly
 using LightGraphs
 using GraphPlot, Compose
-using Fontconfig    # must be using'd *after* Compose!
 using Colors
 using Misc
 
@@ -62,7 +61,7 @@ colors = Color[]
 
 
 # Erase old images.
-run(`rm /tmp/output*.png`)
+run(`rm -f /tmp/output*.svg`)
 
 for iter in 1:num_iter
     pr("Iteration $(iter)...")
@@ -82,11 +81,11 @@ for iter in 1:num_iter
 
     colors = [ in_proto(n) ? colorant"red" : colorant"lightblue" for n in 1:N ]
 
-    draw(PNG("/tmp/output$(iter).png"),
+    draw(SVG("/tmp/output$(iter).svg"),
         gplot(graph, 
             nodelabel=1:N,
             NODESIZE=.08,
             nodefillc=colors))
 end
 
-run(`convert -delay 20 /tmp/output*.png /tmp/output.gif`)
+run(`convert -delay 20 /tmp/output*.svg /tmp/output.gif`)
