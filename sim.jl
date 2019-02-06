@@ -3,8 +3,9 @@
 using Gadfly
 using LightGraphs
 using GraphPlot, Compose
-using Colors
+using ColorSchemes, Colors
 using Misc
+using Random
 
 ################################ functions ################################
 in_proto(node) = any(node in proto for proto in protos)
@@ -15,6 +16,13 @@ function form_proto(node1, node2)
     pr("Forming PI with $(node1) and $(node2)!")
     global protos
     push!(protos, Set{Int64}([node1,node2]))
+end
+
+function compute_colors()
+    global protos, possible_colors
+    [ in_proto(n) ?
+        possible_colors[findfirst(x -> n in x, protos)] :
+        colorant"lightblue" for n in 1:N ]
 end
 ###########################################################################
 
@@ -50,20 +58,23 @@ max_starting_wealth = params["max_starting_wealth"]
 proto_threshold = params["proto_threshold"]
 
 
-# A set of proto-institutions, each of which is a set of member vertex numbers.
-protos = Set{Set{Int64}}()
+# A list of proto-institutions, each of which is a set of member vertex
+# numbers. (Could be a set, but we're using it as an index to the colors
+# array, to uniquely color members of each proto.)
+protos = Set{Int64}[]
 
 # The initial social network.
 graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
 
 wealths = rand(Float16, N) * max_starting_wealth
-colors = Color[]
+possible_colors = Random.shuffle(ColorSchemes.rainbow.colors)
 
 
 # Erase old images.
 run(`rm -f /tmp/output*.svg`)
 
 for iter in 1:num_iter
+
     pr("Iteration $(iter)...")
     node1 = rand(1:N)
     if rand(Float16) < openness  ||  length(neighbors(graph,node1)) == 0
@@ -79,7 +90,8 @@ for iter in 1:num_iter
         form_proto(node1, node2)
     end
 
-    colors = [ in_proto(n) ? colorant"red" : colorant"lightblue" for n in 1:N ]
+    colors = compute_colors()
+
 
     draw(SVG("/tmp/output$(iter).svg"),
         gplot(graph, 
