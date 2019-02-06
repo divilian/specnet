@@ -93,7 +93,7 @@ for iter in 1:num_iter
     colors = compute_colors()
 
 
-    draw(SVG("/tmp/output$(iter).svg"),
+    draw(SVG("/tmp/output$(lpad(string(iter),4,'0')).svg"),
         gplot(graph, 
             nodelabel=1:N,
             NODESIZE=.08,
