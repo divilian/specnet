@@ -73,9 +73,20 @@ possible_colors = Random.shuffle(ColorSchemes.rainbow.colors)
 # Erase old images.
 run(`rm -f /tmp/output*.svg`)
 
+locs_x, locs_y = nothing, nothing
+
 for iter in 1:num_iter
 
     pr("Iteration $(iter)...")
+
+    global locs_x, locs_y
+
+    if locs_x == nothing
+        locs_x, locs_y = spring_layout(graph)
+    else
+        locs_x, locs_y = spring_layout(graph, locs_x, locs_y)
+    end
+
     node1 = rand(1:N)
     if rand(Float16) < openness  ||  length(neighbors(graph,node1)) == 0
         # Choose from the graph at large.
@@ -92,9 +103,11 @@ for iter in 1:num_iter
 
     colors = compute_colors()
 
+    remember_layout = x -> spring_layout(x, locs_x, locs_y)
 
     draw(SVG("/tmp/output$(lpad(string(iter),4,'0')).svg"),
         gplot(graph, 
+            layout=remember_layout,
             nodelabel=1:N,
             NODESIZE=.08,
             nodefillc=colors))
