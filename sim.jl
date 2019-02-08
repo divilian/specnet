@@ -114,14 +114,15 @@ for iter in 1:num_iter
         locs_x, locs_y = spring_layout(graph, locs_x, locs_y)
     end
 
-    node1 = rand(1:N)
-    if rand(Float16) < openness  ||  length(neighbors(graph,node1)) == 0
+    node1 = rand(setdiff(1:N,dead))
+    if rand(Float16) < openness  ||
+            length(setdiff(neighbors(graph,node1),dead)) == 0
         # Choose from the graph at large.
         node2 = rand(filter(x->x!=node1,1:N))
         prd("$(node1) encounters at-large $(node2)")
     else
         # Choose from a neighbor.
-        node2 = rand(neighbors(graph,node1))
+        node2 = rand(setdiff(neighbors(graph,node1),dead))
         prd("$(node1) encounters neighbor $(node2)")
     end
     if eligible_for_proto(node1) && eligible_for_proto(node2)
