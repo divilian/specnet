@@ -22,7 +22,22 @@ function compute_colors()
     global protos, possible_colors
     [ in_proto(n) ?
         possible_colors[findfirst(x -> n in x, protos)] :
-        colorant"lightgrey" for n in 1:N ]
+        (n in dead ? colorant"black" : colorant"lightgrey") for n in 1:N ]
+end
+
+function remove_node(node)
+    # See warnings at http://juliagraphs.github.io/LightGraphs.jl/latest/generators.html#LightGraphs.SimpleGraphs.rem_vertex!
+    # Let's just sever the node from its neighbors and put it in an isolated 
+    # place. Otherwise, not only do we have to adjust all the external data 
+    # structures (wealths, colors, etc.) but the node numbers will suddenly 
+    # change making things difficult to track.
+    global graph, dead
+    friends = neighbors(graph, node)
+    for friend in friends
+        prd("Removing edge between $(node) and $(friend)...")
+        rem_edge!(graph, node, friend)
+    end
+    push!(dead, node)
 end
 ###########################################################################
 
@@ -67,6 +82,9 @@ proto_threshold = params["proto_threshold"]
 # numbers. (Could be a set, but we're using it as an index to the colors
 # array, to uniquely color members of each proto.)
 protos = Set{Int64}[]
+
+# The nodes that have perished (initially none).
+dead = Set{Int64}()
 
 # The initial social network.
 graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
@@ -133,6 +151,12 @@ for iter in 1:num_iter
     wealths .+= (rand(Float16, N) .- .5) .* mean_salary
     proto_payoffs = [ in_proto(n) ? rand(Float16)*10 : 0 for n in 1:N ]
     wealths .+= proto_payoffs
+
+    dying_nodes = setdiff((1:N)[wealths .< 0], dead)
+    for dying_node in dying_nodes
+        pri("Agent $(dying_node) died!")
+        remove_node(dying_node)
+    end
 end
 
 run(`convert -delay 20 /tmp/output*.svg /tmp/output.gif`)
