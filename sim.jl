@@ -114,6 +114,9 @@ for iter in 1:num_iter
         layout=remember_layout,
         nodelabel=1:N,
         NODESIZE=.08,
+        nodesize=wealths*4,
+        nodestrokec=colorant"grey",
+        nodestrokelw=.5,
         nodefillc=colors)
     draw(SVG("/tmp/output$(lpad(string(iter),3,'0')).svg"), plot)
 end
