@@ -32,7 +32,7 @@ function remove_node(node)
     # structures (wealths, colors, etc.) but the node numbers will suddenly 
     # change making things difficult to track.
     global graph, dead
-    friends = neighbors(graph, node)
+    friends = collect(neighbors(graph, node))
     for friend in friends
         prd("Removing edge between $(node) and $(friend)...")
         rem_edge!(graph, node, friend)
