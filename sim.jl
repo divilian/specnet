@@ -13,7 +13,7 @@ in_proto(node) = any(node in proto for proto in protos)
 eligible_for_proto(node) = wealths[node] > proto_threshold && !in_proto(node)
 
 function form_proto(node1, node2)
-    pr("Forming PI with $(node1) and $(node2)!")
+    prd("Forming PI with $(node1) and $(node2)!")
     global protos
     push!(protos, Set{Int64}([node1,node2]))
 end
@@ -82,7 +82,7 @@ locs_x, locs_y = nothing, nothing
 
 for iter in 1:num_iter
 
-    pr("Iteration $(iter)...")
+    pri("Iteration $(iter)...")
 
     global locs_x, locs_y
 
@@ -96,11 +96,11 @@ for iter in 1:num_iter
     if rand(Float16) < openness  ||  length(neighbors(graph,node1)) == 0
         # Choose from the graph at large.
         node2 = rand(filter(x->x!=node1,1:N))
-        pr("$(node1) encounters at-large $(node2)")
+        prd("$(node1) encounters at-large $(node2)")
     else
         # Choose from a neighbor.
         node2 = rand(neighbors(graph,node1))
-        pr("$(node1) encounters neighbor $(node2)")
+        prd("$(node1) encounters neighbor $(node2)")
     end
     if eligible_for_proto(node1) && eligible_for_proto(node2)
         form_proto(node1, node2)
