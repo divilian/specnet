@@ -70,6 +70,10 @@ protos = Set{Int64}[]
 
 # The initial social network.
 graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
+while !is_connected(graph)
+    pri("Not connected; regenerating...")
+    graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
+end
 
 wealths = rand(Float16, N) * max_starting_wealth
 possible_colors = Random.shuffle(ColorSchemes.rainbow.colors)
