@@ -159,4 +159,4 @@ for iter in 1:num_iter
     end
 end
 
-run(`convert -delay 20 /tmp/output*.svg /tmp/output.gif`)
+#run(`convert -delay 40 /tmp/output*.svg /tmp/output.gif`)
