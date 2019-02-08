@@ -99,6 +99,11 @@ for iter in 1:num_iter
     end
     if eligible_for_proto(node1) && eligible_for_proto(node2)
         form_proto(node1, node2)
+        # Since they're forming a proto, they also become socially connected
+        # (if they weren't already.)
+        if !has_edge(graph, node1, node2)
+            add_edge!(graph, node1, node2)
+        end
     end
 
     colors = compute_colors()
