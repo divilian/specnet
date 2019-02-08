@@ -22,7 +22,7 @@ function compute_colors()
     global protos, possible_colors
     [ in_proto(n) ?
         possible_colors[findfirst(x -> n in x, protos)] :
-        colorant"lightblue" for n in 1:N ]
+        colorant"lightgrey" for n in 1:N ]
 end
 ###########################################################################
 
