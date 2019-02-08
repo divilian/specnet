@@ -150,6 +150,9 @@ for iter in 1:num_iter
 
     # Payday!
     wealths .+= (rand(Float16, N) .- .5) .* mean_salary
+    for d in dead
+        wealths[d] = -500
+    end
     proto_payoffs = [ in_proto(n) ? rand(Float16)*10 : 0 for n in 1:N ]
     wealths .+= proto_payoffs
 
