@@ -110,12 +110,12 @@ for iter in 1:num_iter
 
     remember_layout = x -> spring_layout(x, locs_x, locs_y)
 
-    draw(SVG("/tmp/output$(lpad(string(iter),4,'0')).svg"),
-        gplot(graph, 
-            layout=remember_layout,
-            nodelabel=1:N,
-            NODESIZE=.08,
-            nodefillc=colors))
+    plot = gplot(graph,
+        layout=remember_layout,
+        nodelabel=1:N,
+        NODESIZE=.08,
+        nodefillc=colors)
+    draw(SVG("/tmp/output$(lpad(string(iter),3,'0')).svg"), plot)
 end
 
 run(`convert -delay 20 /tmp/output*.svg /tmp/output.gif`)
