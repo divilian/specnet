@@ -35,7 +35,7 @@ function remove_node(node)
     friends = collect(neighbors(graph, node))
     for friend in friends
         prd("Removing edge between $(node) and $(friend)...")
-        rem_edge!(graph, node, friend)
+        #rem_edge!(graph, node, friend)
     end
     push!(dead, node)
 end
@@ -141,7 +141,7 @@ for iter in 1:num_iter
         layout=remember_layout,
         nodelabel=1:N,
         NODESIZE=.08,
-        nodesize=wealths*4,
+        nodesize=ifelse.(wealths .> 0, wealths*4, 100),
         nodestrokec=colorant"grey",
         nodestrokelw=.5,
         nodefillc=colors)
