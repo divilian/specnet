@@ -142,7 +142,7 @@ for iter in 1:num_iter
         layout=remember_layout,
         nodelabel=1:N,
         NODESIZE=.08,
-        nodesize=ifelse.(wealths .> 0, wealths*4, 100),
+        nodesize=ifelse.(wealths .> 0, wealths*4, maximum(wealths)*2),
         nodestrokec=colorant"grey",
         nodestrokelw=.5,
         nodefillc=colors)
