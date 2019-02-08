@@ -124,6 +124,11 @@ for iter in 1:num_iter
         nodestrokelw=.5,
         nodefillc=colors)
     draw(SVG("/tmp/output$(lpad(string(iter),3,'0')).svg"), plot)
+
+    # Payday!
+    wealths .+= (rand(Float16, N) .- .5) .* mean_salary
+    proto_payoffs = [ in_proto(n) ? rand(Float16)*10 : 0 for n in 1:N ]
+    wealths .+= proto_payoffs
 end
 
 run(`convert -delay 20 /tmp/output*.svg /tmp/output.gif`)
