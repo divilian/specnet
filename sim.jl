@@ -29,22 +29,26 @@ end
 
 params = Dict(
     "N" => 20,
-    "openness" => .1, 
+    "openness" => .2,
     "num_iter" => 100,
     "max_starting_wealth" => 100,
+    "mean_salary" => 10,
     "proto_threshold" => 50
 )
 
 println("Running SriMilG...")
-if length(ARGS) == 4
+if length(ARGS) == 6
     using_defaults = false
     params["N"] = ARGS[1]
     params["openness"] = ARGS[2]
     params["num_iter"] = ARGS[3]
+    params["max_starting_wealth"] = ARGS[4]
+    params["mean_salary"] = ARGS[5]
+    params["proto_threshold"] = ARGS[6]
 elseif length(ARGS) == 0
     using_defaults = true
 else
-    println("Usage: sim.jl N openness num_iter.")
+    println("Usage: sim.jl N openness num_iter max_starting_wealth mean_salary proto_threshold.")
 end
 
 println("Using" * (using_defaults ? " defaults" : "") * ":")
@@ -55,6 +59,7 @@ N = params["N"]
 openness = params["openness"]
 num_iter = params["num_iter"]
 max_starting_wealth = params["max_starting_wealth"]
+mean_salary = params["mean_salary"]
 proto_threshold = params["proto_threshold"]
 
 
