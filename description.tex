@@ -1,0 +1,109 @@
+\documentclass[12pt]{beamer}
+\usepackage{mathtools}
+\useoutertheme{infolines}
+\usetheme{default}
+\usefonttheme{serif}
+%\usefonttheme{structuresmallcapsserif}
+\hypersetup{colorlinks=true,linkcolor=blue}
+\setbeamertemplate{navigation symbols}{}
+\author{Stephen Davies}
+\definecolor{darkgreen}{rgb}{0,.5,0}
+\usepackage{MnSymbol}
+\newcommand{\freakingtilde}{\raisebox{0.5ex}{\texttildelow}}
+\begin{document}
+
+\begin{frame}[c]{What you're seeing}
+
+\begin{itemize}
+\pause
+\item Geometric positioning ($x,y$ position of nodes) has \textbf{no meaning}.
+\pause
+\item There is no landscape at all. An agent's state has only these attributes:
+    \begin{itemize}
+    \item A wealth (floating-pt number $> 0$).
+    \item Its associates in the social network (mostly static for now).
+    \item Whether it's in a proto-institution, and if so, with whom.
+    \end{itemize}
+
+\pause
+\item Wealth profit/loss is currently completely random (nothing to do with
+``how rich your sugar square is,'' because there are no sugar squares).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[c]{The process}
+
+\begin{enumerate}
+\small
+\item Agents begin on a random (connected) social network. They are each given
+an initial wealth \freakingtilde U(0 to 100).
+
+\pause
+\item At each iteration:
+
+    \begin{enumerate}
+    \item Two agents are chosen at random:
+
+        \begin{enumerate}
+        \item The first is chosen at random.
+        \item With probability $o$ (``openness''), the second node is chosen
+from the graph at large. With probability $1-o$, the second node is chosen from
+the first node's neighbors.
+        \end{enumerate}
+
+\pause
+    \item If neither agent is in a proto-institution, and if both of their
+wealths are greater than $T$ (threshold; currently 50.0), they form a
+proto-institution. (In this case, if not already neighbors, they are made
+neighbors.)
+
+\pause
+    \item All agents are given a ``wealth adjustment'' \freakingtilde
+U(-.5,.5)
+
+\pause
+    \item Agents with $< 0$ wealth die.
+    \end{enumerate}
+
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}[c]{Visualization}
+
+In the visualization, a node's \textbf{size} is related to its \textbf{wealth}.
+
+\pause
+\bigskip
+
+A node's \textbf{color} shows its \textbf{proto-institution}. (White indicates
+none. Black indicates the node has died.)
+
+\end{frame}
+
+\begin{frame}[c]{Not done yet}
+
+\pause
+\begin{itemize}
+\itemsep.1em
+\item Proto-institutions actually functioning:
+    \begin{itemize}
+    \item \textbf{Pooling} of resources (so members are prevented from dipping
+below zero wealth.)
+\pause
+    \item \textbf{Investment} (\textit{i.e.}, membership in a proto-institution
+can increase one's wealth.)
+    \end{itemize}
+\pause
+\item \textbf{More than two} agents per proto-institution.
+\pause
+\item Agents \textbf{learning} about the concept of proto-institutions by being
+exposed to them (even if not accepted).
+\pause
+\item (A dozen other things that Rajesh and Milton will now name.)
+\end{itemize}
+
+\end{frame}
+
+\end{document}
