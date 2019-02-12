@@ -27,10 +27,11 @@ end
 
 function remove_node(node)
     # See warnings at http://juliagraphs.github.io/LightGraphs.jl/latest/generators.html#LightGraphs.SimpleGraphs.rem_vertex!
-    # Let's just sever the node from its neighbors and put it in an isolated 
-    # place. Otherwise, not only do we have to adjust all the external data 
-    # structures (wealths, colors, etc.) but the node numbers will suddenly 
-    # change making things difficult to track.
+    # For now, let's just mark the node as "dead" and keep it in the graph.
+    # We could sever the node from its neighbors and put it in an isolated 
+    # place. Or, we could remove it from the graph altogether, but we'd have to
+    # adjust all the external data structures (wealths, colors, etc.) and the
+    # node numbers would suddenly change making things difficult to track.
     global graph, dead
     friends = collect(neighbors(graph, node))
     for friend in friends
@@ -47,34 +48,36 @@ params = Dict(
     "openness" => .2,
     "num_iter" => 100,
     "max_starting_wealth" => 100,
-    "mean_salary" => 10,
+    "salary_range" => 10,
     "proto_threshold" => 50
 )
 
-println("Running SriMilG...")
 if length(ARGS) == 6
     using_defaults = false
-    params["N"] = ARGS[1]
-    params["openness"] = ARGS[2]
-    params["num_iter"] = ARGS[3]
-    params["max_starting_wealth"] = ARGS[4]
-    params["mean_salary"] = ARGS[5]
-    params["proto_threshold"] = ARGS[6]
+    params["N"] = parse(Int64,ARGS[1])
+    params["openness"] = parse(Float16,ARGS[2])
+    params["num_iter"] = parse(Int64,ARGS[3])
+    params["max_starting_wealth"] = parse(Float16,ARGS[4])
+    params["salary_range"] = parse(Float16,ARGS[5])
+    params["proto_threshold"] = parse(Float16,ARGS[6])
 elseif length(ARGS) == 0
     using_defaults = true
 else
-    println("Usage: sim.jl N openness num_iter max_starting_wealth mean_salary proto_threshold.")
+    println("Usage: sim.jl N openness num_iter max_starting_wealth salary_range proto_threshold.")
+    exit(1)
 end
 
+println("Running sim...")
 println("Using" * (using_defaults ? " defaults" : "") * ":")
 display(params)
+println()
 
 # There must be a better way to do this using eval():
 N = params["N"]
 openness = params["openness"]
 num_iter = params["num_iter"]
 max_starting_wealth = params["max_starting_wealth"]
-mean_salary = params["mean_salary"]
+salary_range = params["salary_range"]
 proto_threshold = params["proto_threshold"]
 
 
@@ -98,7 +101,7 @@ possible_colors = Random.shuffle(ColorSchemes.rainbow.colors)
 
 
 # Erase old images.
-run(`rm -f /tmp/output*.svg`)
+run(`rm -f /tmp/output"*".svg`)
 
 locs_x, locs_y = nothing, nothing
 
@@ -149,7 +152,7 @@ for iter in 1:num_iter
     draw(SVG("/tmp/output$(lpad(string(iter),3,'0')).svg"), plot)
 
     # Payday!
-    wealths .+= (rand(Float16, N) .- .5) .* mean_salary
+    wealths .+= (rand(Float16, N) .- .5) .* salary_range
     for d in dead
         wealths[d] = -500
     end
