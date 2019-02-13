@@ -101,7 +101,7 @@ possible_colors = Random.shuffle(ColorSchemes.rainbow.colors)
 
 
 # Erase old images.
-run(`rm -f /tmp/output"*".svg`)
+run(`rm -f $(tempdir())/output"*".svg`)
 
 locs_x, locs_y = nothing, nothing
 
@@ -149,7 +149,7 @@ for iter in 1:num_iter
         nodestrokec=colorant"grey",
         nodestrokelw=.5,
         nodefillc=colors)
-    draw(SVG("/tmp/output$(lpad(string(iter),3,'0')).svg"), plot)
+    draw(SVG("$(tempdir())/output$(lpad(string(iter),3,'0')).svg"), plot)
 
     # Payday!
     wealths .+= (rand(Float16, N) .- .5) .* salary_range
@@ -166,4 +166,4 @@ for iter in 1:num_iter
     end
 end
 
-#run(`convert -delay 40 /tmp/output*.svg /tmp/output.gif`)
+#run(`convert -delay 40 $(tempdir())/output"*".svg $(tempdir())/output.gif`)
