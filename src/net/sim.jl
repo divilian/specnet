@@ -15,7 +15,7 @@ in_proto(node) = any(node in proto for proto in protos)
 eligible_for_proto(node) = wealths[node] > proto_threshold && !in_proto(node)
 
 function form_proto(node1, node2)
-    prd("Forming PI with $(node1) and $(node2)!")
+    prd("Forming proto with $(node1) and $(node2)!")
     global protos
     push!(protos, Set{Int64}([node1,node2]))
 end
