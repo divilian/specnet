@@ -46,7 +46,7 @@ end
 
 
 params = Dict(
-    "N" => 40,
+    "N" => 20,
     "openness" => 0,
     "num_iter" => 100,
     "max_starting_wealth" => 100,
