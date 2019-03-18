@@ -45,7 +45,7 @@ end
 
 params = Dict(
     "N" => 40,
-    "openness" => .2,
+    "openness" => 0,
     "num_iter" => 100,
     "max_starting_wealth" => 100,
     "salary_range" => 10,
