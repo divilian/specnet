@@ -7,6 +7,8 @@ using ColorSchemes, Colors
 using Misc
 using Random
 
+Random.seed!(1234)
+
 ################################ functions ################################
 in_proto(node) = any(node in proto for proto in protos)
 
