@@ -51,7 +51,8 @@ params = Dict(
     "num_iter" => 100,
     "max_starting_wealth" => 100,
     "salary_range" => 10,
-    "proto_threshold" => 50
+    "proto_threshold" => 50,
+    "make_anim" => false
 )
 
 if length(ARGS) == 6
@@ -62,10 +63,11 @@ if length(ARGS) == 6
     params["max_starting_wealth"] = parse(Float16,ARGS[4])
     params["salary_range"] = parse(Float16,ARGS[5])
     params["proto_threshold"] = parse(Float16,ARGS[6])
+    params["make_anim"] = parse(Bool,ARGS[7])
 elseif length(ARGS) == 0
     using_defaults = true
 else
-    println("Usage: sim.jl N openness num_iter max_starting_wealth salary_range proto_threshold.")
+    println("Usage: sim.jl N openness num_iter max_starting_wealth salary_range proto_threshold make_anim.")
     exit(1)
 end
 
@@ -81,6 +83,7 @@ num_iter = params["num_iter"]
 max_starting_wealth = params["max_starting_wealth"]
 salary_range = params["salary_range"]
 proto_threshold = params["proto_threshold"]
+make_anim = params["make_anim"]
 
 
 # A list of proto-institutions, each of which is a set of member vertex
@@ -168,4 +171,7 @@ for iter in 1:num_iter
     end
 end
 
-#run(`convert -delay 40 $(tempdir())/output"*".svg $(tempdir())/output.gif`)
+if make_anim
+    println("Building animation...")
+    run(`convert -delay 20 $(tempdir())/output"*".svg $(tempdir())/output.gif`)
+end
