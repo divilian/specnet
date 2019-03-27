@@ -7,7 +7,19 @@ using ColorSchemes, Colors
 using Misc
 using Random
 
-Random.seed!(1234)
+## Input parameters
+N = 10                         # number of agents
+num_iter = 100                 # number of iterations the simulation runs
+openness = 0                   # 0 <= openness <= 1   (0: always choose from neighbor, 1: always choose from entire city)
+max_starting_wealth = 100      # each agent starts with wealth U~(0,max_starting_wealth)
+salary_range = 10              # each iteration, each agent receives/loses U~(-salary_range, salary_range) wealth
+proto_threshold = 50           # each agent in an encounter must have wealth about proto_threshold to form a proto
+make_anim = false              # do, or do not, create an animation of results
+random_seed = 1234             # random number generator starting seed
+params = [:N, :num_iter, :openness, :max_starting_wealth, :salary_range,
+    :proto_threshold, :make_anim, :random_seed]
+
+Random.seed!(random_seed)
 
 # Note on representation:
 #
@@ -116,46 +128,10 @@ rev_dict(d) = Dict(y=>x for (x,y) in d)
 ###########################################################################
 
 
-params = Dict(
-    "N" => 20,
-    "openness" => 0,
-    "num_iter" => 100,
-    "max_starting_wealth" => 100,
-    "salary_range" => 10,
-    "proto_threshold" => 50,
-    "make_anim" => false
-)
-
-if length(ARGS) == 6
-    using_defaults = false
-    params["N"] = parse(Int64,ARGS[1])
-    params["openness"] = parse(Float16,ARGS[2])
-    params["num_iter"] = parse(Int64,ARGS[3])
-    params["max_starting_wealth"] = parse(Float16,ARGS[4])
-    params["salary_range"] = parse(Float16,ARGS[5])
-    params["proto_threshold"] = parse(Float16,ARGS[6])
-    params["make_anim"] = parse(Bool,ARGS[7])
-elseif length(ARGS) == 0
-    using_defaults = true
-else
-    println("Usage: sim.jl N openness num_iter max_starting_wealth salary_range proto_threshold make_anim.")
-    exit(1)
+println("Running SPECnet...")
+for param in params
+    println("   $(param) = $(eval(param))")
 end
-
-println("Running sim...")
-println("Using" * (using_defaults ? " defaults" : "") * ":")
-display(params)
-println()
-
-# There must be a better way to do this using eval():
-N = params["N"]
-openness = params["openness"]
-num_iter = params["num_iter"]
-max_starting_wealth = params["max_starting_wealth"]
-salary_range = params["salary_range"]
-proto_threshold = params["proto_threshold"]
-make_anim = params["make_anim"]
-
 
 # A list of proto-institutions, each of which is a set of participating agent
 # numbers. (Could be a set instead of a list, but we're using it as an index to
