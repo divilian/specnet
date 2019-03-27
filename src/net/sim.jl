@@ -61,12 +61,6 @@ function kill_agent(dying_agent)
     deleteat!(locs_x, dying_node)
     deleteat!(locs_y, dying_node)
 
-    prd("============================================")
-    prd("About to kill agent $(dying_agent) (node $(dying_node)).")
-    prd("agents_to_nodes is now: $(agents_to_nodes)")
-    prd("the graph is now: $(graph)")
-    prd("dead is now: $(dead)")
-
     friend_nodes = collect(neighbors(graph, dying_node))
     for friend_node in friend_nodes
         rem_edge!(graph, dying_node, friend_node)
@@ -78,12 +72,6 @@ function kill_agent(dying_agent)
         for (a,n) in agents_to_nodes)
     pop!(agents_to_nodes,dying_agent)
     rem_vertex!(graph, dying_node)
-
-    prd("...Killed!")
-    prd("agents_to_nodes is now: $(agents_to_nodes)")
-    prd("the graph is now: $(graph)")
-    prd("dead is now: $(dead)")
-    prd("============================================")
 
 end
 
