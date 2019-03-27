@@ -52,11 +52,14 @@ function get_agent_for_node(node)
 end
 
 # Mark the agent "dead" whose agent number is passed. This involves surgically
-# removing it from the graph, adding it to the "dead" list, and adjusting the
-# agent-to-node mappings.
+# removing it from the graph, adding it to the "dead" list, adjusting the
+# agent-to-node mappings, and deleting it from the list of last-frame's plot
+# coordinates.
 function kill_agent(dying_agent)
-    global graph, dead, agents_to_nodes
+    global graph, dead, agents_to_nodes, locs_x, locs_y
     dying_node = get_node_for_agent(dying_agent)
+    deleteat!(locs_x, dying_node)
+    deleteat!(locs_y, dying_node)
 
     prd("============================================")
     prd("About to kill agent $(dying_agent) (node $(dying_node)).")
@@ -239,7 +242,7 @@ for iter in 1:num_iter
     wealths_to_plot = map(node->wealths[get_agent_for_node(node)],
         1:length(agents_to_nodes))
     plot = gplot(graph,
-#        layout=remember_layout,
+        layout=remember_layout,
         nodelabel=labels_to_plot,
         NODESIZE=.08,
         nodesize=ifelse.(wealths_to_plot .> 0, 
