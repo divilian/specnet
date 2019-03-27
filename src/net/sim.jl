@@ -1,12 +1,5 @@
 #!/usr/bin/env julia
 
-using Gadfly
-using LightGraphs
-using GraphPlot, Compose
-using ColorSchemes, Colors
-using Misc
-using Random
-
 ## Input parameters
 N = 10                         # number of agents
 num_iter = 100                 # number of iterations the simulation runs
@@ -18,6 +11,13 @@ make_anim = false              # do, or do not, create an animation of results
 random_seed = 1234             # random number generator starting seed
 params = [:N, :num_iter, :openness, :max_starting_wealth, :salary_range,
     :proto_threshold, :make_anim, :random_seed]
+
+using Gadfly
+using LightGraphs
+using GraphPlot, Compose
+using ColorSchemes, Colors
+using Misc
+using Random
 
 Random.seed!(random_seed)
 
