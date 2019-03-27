@@ -8,9 +8,10 @@ max_starting_wealth = 100      # each agent starts with wealth U~(0,max_starting
 salary_range = 10              # each iteration, each agent receives/loses U~(-salary_range, salary_range) wealth
 proto_threshold = 50           # each agent in an encounter must have wealth about proto_threshold to form a proto
 make_anim = false              # do, or do not, create an animation of results
+animation_delay = 20           # milliseconds between animation frames
 random_seed = 1234             # random number generator starting seed
 params = [:N, :num_iter, :openness, :max_starting_wealth, :salary_range,
-    :proto_threshold, :make_anim, :random_seed]
+    :proto_threshold, :make_anim, :animation_delay, :random_seed]
 
 using Gadfly
 using LightGraphs
@@ -235,5 +236,8 @@ end
 
 if make_anim
     println("Building animation...")
-    run(`convert -delay 20 $(tempdir())/output"*".svg $(tempdir())/output.gif`)
+    run(`convert -delay $(animation_delay) $(tempdir())/output"*".svg $(tempdir())/output.gif`)
 end
+
+display("image/gif", read("$(tempdir())/output.gif"))
+println("...end SPECnet.")
