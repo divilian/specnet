@@ -12,6 +12,10 @@ animation_delay = 20           # milliseconds between animation frames
 random_seed = 1234             # random number generator starting seed
 params = [:N, :num_iter, :openness, :max_starting_wealth, :salary_range,
     :proto_threshold, :make_anim, :animation_delay, :random_seed]
+println("SPECnet simulation parameters:")
+for param in params
+    println("   $(param) = $(eval(param))")
+end
 
 using Gadfly
 using LightGraphs
@@ -19,6 +23,7 @@ using GraphPlot, Compose
 using ColorSchemes, Colors
 using Misc
 using Random
+using Cairo, Fontconfig
 
 Random.seed!(random_seed)
 
@@ -130,9 +135,6 @@ rev_dict(d) = Dict(y=>x for (x,y) in d)
 
 
 println("Running SPECnet...")
-for param in params
-    println("   $(param) = $(eval(param))")
-end
 
 # A list of proto-institutions, each of which is a set of participating agent
 # numbers. (Could be a set instead of a list, but we're using it as an index to
@@ -145,6 +147,7 @@ dead = Set{Int64}()
 # The initial social network.
 graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
 while !is_connected(graph)
+    global graph
     pri("Not connected; regenerating...")
     graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
 end
@@ -157,13 +160,15 @@ possible_colors = Random.shuffle(ColorSchemes.rainbow.colors)
 
 
 # (Erase old images.)
-run(`rm -f $(tempdir())/output"*".svg`)
+run(`rm -f $(tempdir())/output"*".png $(tempdir())/output"*".svg`)
 
 locs_x, locs_y = nothing, nothing
 
+println("Iterations:")
+
 for iter in 1:num_iter
 
-    pri("Iteration $(iter)...")
+    if iter % 10 == 0 println(iter) else print(".") end
 
     global graph, locs_x, locs_y
 
@@ -216,7 +221,7 @@ for iter in 1:num_iter
         nodestrokec=colorant"grey",
         nodestrokelw=.5,
         nodefillc=colors)
-    draw(SVG("$(tempdir())/output$(lpad(string(iter),3,'0')).svg"), plot)
+    draw(PNG("$(tempdir())/output$(lpad(string(iter),3,'0')).png"), plot)
 
     # Payday!
     wealths .+= (rand(Float16, N) .- .5) .* salary_range
@@ -236,8 +241,8 @@ end
 
 if make_anim
     println("Building animation...")
+    run(`mogrify -format svg $(tempdir())/output"*".png`)
     run(`convert -delay $(animation_delay) $(tempdir())/output"*".svg $(tempdir())/output.gif`)
 end
 
-display("image/gif", read("$(tempdir())/output.gif"))
 println("...end SPECnet.")
