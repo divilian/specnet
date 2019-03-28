@@ -10,9 +10,9 @@ modeling construct, rather than a 2d grid as in models like
 [Sugarscape](https://en.wikipedia.org/wiki/Sugarscape) and
 systems like [NetLogo](https://ccl.northwestern.edu/netlogo/).
 
-The additional project, which is complimentary to SPECnet is [SPECscape](https://github.com/IngenuityArts/spcescape) and is based on the 2D grid approach noted above. The complimentarity is currently being proposed as follows:
+The additional project, which is complementary to SPECnet is [SPECscape](https://github.com/IngenuityArts/spcescape) and is based on the 2D grid approach noted above. The complimentarity is currently being proposed as follows:
 
-SPECnet develops its approach with reference to SPECscape and SPECscape develops its approach with reference to SPECnet. They are, in a sense, independent but actively conscious in contrasting clearly where there are differences, build off commonalities, and seek useful complimentarities where the differences turn out to be enhancements.
+SPECnet develops its approach with reference to SPECscape and SPECscape develops its approach with reference to SPECnet. They are, in a sense, independent but actively conscious in contrasting clearly where there are differences, build off commonalities, and seek useful complementarities where the differences turn out to be enhancements.
 
 *I've added the above two paragraphs just to get the Git on but also, hopefully, as an idea that can fruitfully carry our work forward.
 
