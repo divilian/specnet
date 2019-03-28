@@ -127,7 +127,7 @@ function compute_colors()
             findfirst(x -> get_agent_for_node(node) in x, protos)] :
             (get_agent_for_node(node) in dead ?
                     colorant"pink" : colorant"lightgrey")
-    for node in values(agents_to_nodes) ]
+    for node in 1:nv(graph) ]
 end
 
 rev_dict(d) = Dict(y=>x for (x,y) in d)
