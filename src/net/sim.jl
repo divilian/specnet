@@ -79,6 +79,8 @@ function kill_agent(dying_agent)
         (a==dying_agent ? Nothing :
             (AN[a] == nv(graph) ? AN[dying_agent] : AN[a]))
         for (a,n) in AN)
+    # TODO: the rem_vertices!() function that Simon Schoelly wrote returns a
+    # map of old-to-new node numbers, and might be safer.
     rem_vertex!(graph, dying_node)
     pop!(AN,dying_agent)
 end
