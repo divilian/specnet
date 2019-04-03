@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 ## Input parameters
-N = 10                         # number of agents
+N = 30                         # number of agents
 num_iter = 100                 # number of iterations the simulation runs
 openness = 0                   # 0 <= openness <= 1   (0: always choose from neighbor, 1: always choose from entire city)
 max_starting_wealth = 100      # each agent starts with wealth U~(0,max_starting_wealth)
@@ -17,6 +17,8 @@ for param in params
     println("   $(param) = $(eval(param))")
 end
 
+LETTERS = collect('A':'Z')
+[ push!(LETTERS, x) for x in 'a':'z' ]
 using Gadfly
 using LightGraphs
 using GraphPlot, Compose
@@ -29,68 +31,56 @@ Random.seed!(random_seed)
 
 # Note on representation:
 #
-# The word "agent" refers to an integer in the range 1:N (where N = N_0 is the
-# original number of agents). An agent's number *always stays the same*, even
-# when agents die whose number is lower than its number.
+# An "agent" is identified by a letter (see LETTERS variable, above.) An
+# agent's letter *always stays the same*, even when agents die.
 #
 # The word "node," on the other hand, refers to an integer in the range 1:N_t,
 # which is the current number of living agents at time t. The node numbers will
 # always occupy the entire contiguous sequence 1:N_t (with no "holes").
 #
 # Example: suppose N_0 is 5, so there are 5 agents initially. At the start of
-# the sim, the agents are 1, 2, 3, 4, 5, and the nodes are 1, 2, 3, 4, 5. If
-# agents #2 and #4 die, then the living agents would be 1, 3, 5, and the nodes
-# would be 1, 2, 3.
+# the sim, the agents are A, B, C, D, E, and the nodes are 1, 2, 3, 4, 5. If
+# agents B and D die, then the living agents would be A, C, E, and the
+# corresponding nodes would be 1, 2, 3.
 #
-# The functions "get_node_for_agent()" and "get_agent_for_node()" translate
-# between the two. In the above example, calling get_node_for_agent(5) would
-# return the value 3, and get_agent_for_node(3) would return 5. Calling
-# get_node_for_agent(2) would return the Julia constant "Nothing". Calling
-# get_agent_for_node(5) would also return "Nothing".
-
+# The global variable AN is an (always currently maintained) mapping from agent
+# numbers to node numbers. To find the graph node that corresponds to a
+# particular agent a, do this:
+#
+#     AN[a]
+#
+# To find the agent that corresponds to a particular node n, do this:
+#
+#     [ a for a in keys(AN) if AN[a] == n ][1] 
+#
+# (Yes, this reverse lookup is not efficient. If this turns out to be a
+# problem, will implement two dictionaries, one in each direction, and keep
+# them ruthlessly in sync.)
+#
 ################################ functions ################################
-
-# Return the node id in the current graph that matches the agent whose number
-# is passed. If the agent is dead, return Nothing.
-function get_node_for_agent(agent)
-    global agents_to_nodes
-    ret_val = agents_to_nodes[agent]
-    return ret_val != 0 ? ret_val : Nothing
-end
-
-# Return the agent number represented in the graph by the node id passed. If
-# the parameter is greater than the number of living agents, return Nothing.
-function get_agent_for_node(node)
-    global agents_to_nodes
-    if !(node in values(agents_to_nodes))
-        return Nothing
-    end
-    nodes_to_agents = rev_dict(agents_to_nodes)
-    return nodes_to_agents[node]
-end
 
 # Mark the agent "dead" whose agent number is passed. This involves surgically
 # removing it from the graph, adding it to the "dead" list, adjusting the
 # agent-to-node mappings, and deleting it from the list of last-frame's plot
 # coordinates.
 function kill_agent(dying_agent)
-    global graph, dead, agents_to_nodes, locs_x, locs_y
-    dying_node = get_node_for_agent(dying_agent)
+    global graph, dead, AN, locs_x, locs_y
+    dying_node = AN[dying_agent]
     deleteat!(locs_x, dying_node)
     deleteat!(locs_y, dying_node)
 
-    friend_nodes = collect(neighbors(graph, dying_node))
-    for friend_node in friend_nodes
-        rem_edge!(graph, dying_node, friend_node)
+    neighbor_nodes = neighbors(graph, dying_node)
+    while length(neighbor_nodes) > 0
+        rem_edge!(graph, dying_node, neighbor_nodes[1])
+        neighbor_nodes = neighbors(graph, dying_node)
     end
     push!(dead, dying_agent)
-    agents_to_nodes = Dict(a=>
+    AN = Dict{Char,Any}(a=>
         (a==dying_agent ? Nothing :
-            (a<dying_agent ? n : n-1))
-        for (a,n) in agents_to_nodes)
-    pop!(agents_to_nodes,dying_agent)
+            (AN[a] == nv(graph) ? AN[dying_agent] : AN[a]))
+        for (a,n) in AN)
     rem_vertex!(graph, dying_node)
-
+    pop!(AN,dying_agent)
 end
 
 # Return true if the agent is a member of any proto institution.
@@ -105,15 +95,15 @@ end
 # Form a new proto between two agents.
 function form_proto(agent1, agent2)
     global protos
-    push!(protos, Set{Int64}([agent1,agent2]))
+    push!(protos, Set{Char}([agent1,agent2]))
 end
 
 function assert_no_dead_neighbors(graph, agent, dead)
-    node = agents_to_nodes[agent]
+    node = AN[agent]
     if intersect(
-        Set(map(node->get_agent_for_node(node),neighbors(graph, node))),
+        Set(map(node->[ a for a in keys(AN) if AN[a] == node ][1],neighbors(graph, node))),
             dead) != Set()
-        nodes_to_agents = rev_dict(agents_to_nodes)
+        nodes_to_agents = rev_dict(AN)
         error("Dead neighbor of $(agent)!\n" *
             "neighbors: $(nodes_to_agents[neighbors(graph, node)]) "*
             "dead: $(dead)")
@@ -122,10 +112,10 @@ end
 
 function compute_colors()
     global protos, possible_colors, N
-    [ in_proto(get_agent_for_node(node)) ?
+    [ in_proto([ a for a in keys(AN) if AN[a] == node ][1]) ?
         possible_colors[
-            findfirst(x -> get_agent_for_node(node) in x, protos)] :
-            (get_agent_for_node(node) in dead ?
+            findfirst(x -> [ a for a in keys(AN) if AN[a] == node ][1] in x, protos)] :
+            ([ a for a in keys(AN) if AN[a] == node ][1] in dead ?
                     colorant"pink" : colorant"lightgrey")
     for node in 1:nv(graph) ]
 end
@@ -139,10 +129,10 @@ println("Running SPECnet...")
 # A list of proto-institutions, each of which is a set of participating agent
 # numbers. (Could be a set instead of a list, but we're using it as an index to
 # the colors array, to uniquely color members of each proto.)
-protos = Set{Int64}[]
+protos = Set{Char}[]
 
 # The numbers of agents who have perished (initially none).
-dead = Set{Int64}()
+dead = Set{Char}()
 
 # The initial social network.
 graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
@@ -151,10 +141,10 @@ while !is_connected(graph)
     pri("Not connected; regenerating...")
     graph = LightGraphs.SimpleGraphs.erdos_renyi(N,.2)
 end
-agents_to_nodes = Dict(k=>k for k in 1:N)
+AN = Dict{Char,Any}(LETTERS[k]=>k for k in 1:N)
 
 # Agent attributes.
-wealths = rand(Float16, N) * max_starting_wealth
+wealths = Dict{Char,Any}(LETTERS[k]=>rand(Float16) * max_starting_wealth for k in 1:N)
 
 possible_colors = Random.shuffle(ColorSchemes.rainbow.colors)
 
@@ -168,6 +158,8 @@ println("Iterations:")
 
 for iter in 1:num_iter
 
+nodes_to_agents = rev_dict(AN)
+
     if iter % 10 == 0 println(iter) else print(".") end
 
     global graph, locs_x, locs_y
@@ -178,17 +170,17 @@ for iter in 1:num_iter
         locs_x, locs_y = spring_layout(graph, locs_x, locs_y)
     end
 
-    agent1 = rand(keys(agents_to_nodes))
+    agent1 = rand(keys(AN))
     assert_no_dead_neighbors(graph, agent1, dead)
     if rand(Float16) < openness  ||
-            length(neighbors(graph, agents_to_nodes[agent1])) == 0
+            length(neighbors(graph, AN[agent1])) == 0
         # Choose from the graph at large.
-        agent2 = rand(filter(x->x!=agent1,keys(agents_to_nodes)))
+        agent2 = rand(filter(x->x!=agent1,keys(AN)))
         prd("$(agent1) encounters at-large $(agent1)")
     else
         # Choose from a neighbor.
-        node2 = rand(neighbors(graph,agents_to_nodes[agent1]))
-        nodes_to_agents = rev_dict(agents_to_nodes)
+        node2 = rand(neighbors(graph,AN[agent1]))
+        nodes_to_agents = rev_dict(AN)
         agent2 = nodes_to_agents[node2]
         prd("$(agent1) encounters neighbor $(agent2)")
     end
@@ -198,8 +190,8 @@ for iter in 1:num_iter
         form_proto(agent1, agent2)
         # Since they're forming a proto, they also become socially connected
         # (if they weren't already.)
-        if !has_edge(graph, agents_to_nodes[agent1], agents_to_nodes[agent2])
-            add_edge!(graph, agents_to_nodes[agent1], agents_to_nodes[agent1])
+        if !has_edge(graph, AN[agent1], AN[agent2])
+            add_edge!(graph, AN[agent1], AN[agent1])
         end
     end
 
@@ -207,10 +199,10 @@ for iter in 1:num_iter
 
     remember_layout = x -> spring_layout(x, locs_x, locs_y)
 
-    labels_to_plot = map(node->get_agent_for_node(node),
-        1:length(agents_to_nodes))
-    wealths_to_plot = map(node->wealths[get_agent_for_node(node)],
-        1:length(agents_to_nodes))
+    labels_to_plot = map(node->[ a for a in keys(AN) if AN[a] == node ][1],
+        1:length(AN))
+    wealths_to_plot = map(node->wealths[[ a for a in keys(AN) if AN[a] == node ][1]],
+        1:length(AN))
     plot = gplot(graph,
         layout=remember_layout,
         nodelabel=labels_to_plot,
@@ -224,15 +216,14 @@ for iter in 1:num_iter
     draw(PNG("$(tempdir())/output$(lpad(string(iter),3,'0')).png"), plot)
 
     # Payday!
-    wealths .+= (rand(Float16, N) .- .5) .* salary_range
+    [ wealths[k] += (rand(Float16) - .5) * salary_range for k in keys(wealths) ]
     for d in dead
         wealths[d] = -500
     end
-    proto_payoffs = [ in_proto(agent) ? rand(Float16)*10 : 0
-        for agent in 1:N ]
-    wealths .+= proto_payoffs
+    [ wealths[k] += in_proto(k) ? rand(Float16)*10 : 0
+        for k in keys(wealths) ]
 
-    dying_agents = setdiff((1:N)[wealths .< 0], dead)
+    dying_agents = [ k for k in keys(wealths) if wealths[k] < 0 && !(k in dead) ]
     for dying_agent in dying_agents
         prd("Agent $(dying_agent) died!")
         kill_agent(dying_agent)
