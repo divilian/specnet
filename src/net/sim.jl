@@ -212,7 +212,10 @@ function specnet(params)
             nodestrokelw=.5,
             nodefillc=colors)
         draw(PNG("$(tempdir())/output$(lpad(string(iter),3,'0')).png"), plot)
-
+       #iteration label for svg files
+       if make_anim
+            run(`mogrify -format svg -gravity South  -pointsize 15 -annotate 0 "Iteration $(iter) of $(num_iter)"  $(tempdir())\output$(lpad(string(iter),3,'0')).png`)
+        end
         # Payday!
         [ wealths[k] += (rand(Float16) - .5) * salary_range for k in keys(wealths) ]
         for d in dead
@@ -230,7 +233,7 @@ function specnet(params)
 
     if make_anim
         println("Building animation...")
-        run(`mogrify -format svg $(tempdir())/output"*".png`)
+      # unlabeled version- run(`mogrify -format svg $(tempdir())/output"*".png`)
         run(`convert -delay $(animation_delay) $(tempdir())/output"*".svg $(tempdir())/output.gif`)
     end
 
