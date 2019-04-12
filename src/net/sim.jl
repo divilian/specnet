@@ -89,6 +89,29 @@ function specnet(params)
         return wealths[agent] > proto_threshold && !in_proto(agent)
     end
 
+    #return true if agent is wealthy enough to join proto
+    function wealth_eligible(agent)
+           return wealths[agent] > proto_threshold
+    end
+    # agent joins preexisting proto
+    function join_proto(agent1,proto)
+        push!(proto,agent1)
+    for agent in proto
+                if !has_edge(graph, AN[agent], AN[agent1])
+                    add_edge!(graph, AN[agent], AN[agent1])
+                end
+		    end
+		end
+		
+		#return the proto a given agent is in
+    function get_proto(agent1)
+        for proto in protos 
+            if agent1 in proto
+                return proto
+             end
+        end
+    end
+    
     # Form a new proto between two agents.
     function form_proto(agent1, agent2)
         global protos
@@ -192,6 +215,18 @@ function specnet(params)
                 add_edge!(graph, AN[agent1], AN[agent1])
             end
         end
+                                                                                                #allow agent to join proto 
+	    if wealth_eligible(agent1) && wealth_eligible(agent2)
+	        if in_proto(agent1)&&!in_proto(agent2)
+	            current_proto=get_proto(agent1)
+	            join_proto(agent2,current_proto)
+	        end
+           
+           if in_proto(agent2)&&!in_proto(agent1)
+	                current_proto=get_proto(agent2)
+	                join_proto(agent1,current_proto)
+	        end
+	end
 
         colors = compute_colors()
 
