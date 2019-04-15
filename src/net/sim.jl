@@ -105,11 +105,15 @@ function specnet(params)
 		
 		#return the proto a given agent is in
     function get_proto(agent1)
-        for proto in protos 
+      if(!in_proto(agent1))
+            return -1
+            else
+		for proto in protos 
             if agent1 in proto
                 return proto
-             end
-        end
+            	 end
+		end
+	end
     end
     
     # Form a new proto between two agents.
