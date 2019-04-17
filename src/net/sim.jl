@@ -294,11 +294,10 @@ function specnet(params)
     end
 
     if make_anim
-        println("Building animations...")
-        # unlabeled version- run(`mogrify -format svg
-        # $(tempdir())/graph"*".png`)
-        run(`convert -delay $(animation_delay) $(tempdir())/graph"*".svg $(tempdir())/graph.gif`)
+        println("Building wealth animation (be unbelievably patient)...")
         run(`convert -delay $(animation_delay) $(tempdir())/wealth"*".svg $(tempdir())/wealth.gif`)
+        println("Building graph animation (be mind-bogglingly patient)...")
+        run(`convert -delay $(animation_delay) $(tempdir())/graph"*".svg $(tempdir())/graph.gif`)
     end
 
     println("...end SPECnet.")
