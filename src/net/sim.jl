@@ -47,7 +47,7 @@ function specnet(params)
     #
     # To find the agent that corresponds to a particular node n, do this:
     #
-    #     [ a for a in keys(AN) if AN[a] == n ][1] 
+    #     [ a for a in keys(AN) if AN[a] == n ][1]
     #
     # (Yes, this reverse lookup is not efficient. If this turns out to be a
     # problem, will implement two dictionaries, one in each direction, and keep
@@ -144,7 +144,7 @@ function specnet(params)
     global AN = Dict{Char,Any}(LETTERS[k]=>k for k in 1:N)
 
     # Agent attributes.
-    global wealths = 
+    global wealths =
         Dict{Char,Any}(LETTERS[k]=>
             rand(Float16) * max_starting_wealth for k in 1:N)
 
@@ -212,7 +212,7 @@ function specnet(params)
             layout=remember_layout,
             nodelabel=labels_to_plot,
             NODESIZE=.08,
-            nodesize=ifelse.(wealths_to_plot .> 0, 
+            nodesize=ifelse.(wealths_to_plot .> 0,
                              wealths_to_plot*4,
                              maximum(wealths_to_plot)*2),
             nodestrokec=colorant"grey",
@@ -241,12 +241,12 @@ function specnet(params)
         end
 
         # Payday!
-        [ wealths[k] += (rand(Float16) - .5) * salary_range 
+        [ wealths[k] += (rand(Float16) - .5) * salary_range
             for k in keys(wealths) ]
         [ wealths[k] += in_proto(k) ? rand(Float16)*10 : 0
             for k in keys(wealths) ]
 
-        dying_agents = 
+        dying_agents =
             [ k for k in keys(wealths) if wealths[k] < 0 && !(k in dead) ]
         for dying_agent in dying_agents
             prd("Agent $(dying_agent) died!")
