@@ -29,18 +29,19 @@ function specnet(params)
     # An "agent" is identified by a letter (see LETTERS variable, above.) An
     # agent's letter *always stays the same*, even when agents die.
     #
-    # The word "node," on the other hand, refers to an integer in the range 1:N_t,
-    # which is the current number of living agents at time t. The node numbers will
-    # always occupy the entire contiguous sequence 1:N_t (with no "holes").
+    # The word "node," on the other hand, refers to an integer in the range
+    # 1:N_t, which is the current number of living agents at time t. The node
+    # numbers will always occupy the entire contiguous sequence 1:N_t (with no
+    # "holes").
     #
-    # Example: suppose N_0 is 5, so there are 5 agents initially. At the start of
-    # the sim, the agents are A, B, C, D, E, and the nodes are 1, 2, 3, 4, 5. If
-    # agents B and D die, then the living agents would be A, C, E, and the
-    # corresponding nodes would be 1, 2, 3.
+    # Example: suppose N_0 is 5, so there are 5 agents initially. At the start
+    # of the sim, the agents are A, B, C, D, E, and the nodes are 1, 2, 3, 4,
+    # 5. If agents B and D die, then the living agents would be A, C, E, and
+    # the corresponding nodes would be 1, 2, 3.
     #
-    # The global variable AN is an (always currently maintained) mapping from agent
-    # numbers to node numbers. To find the graph node that corresponds to a
-    # particular agent a, do this:
+    # The global variable AN is an (always currently maintained) mapping from
+    # agent numbers to node numbers. To find the graph node that corresponds to
+    # a particular agent a, do this:
     #
     #     AN[a]
     #
@@ -54,10 +55,10 @@ function specnet(params)
     #
     ################################ functions ################################
 
-    # Mark the agent "dead" whose agent number is passed. This involves surgically
-    # removing it from the graph, adding it to the "dead" list, adjusting the
-    # agent-to-node mappings, and deleting it from the list of last-frame's plot
-    # coordinates.
+    # Mark the agent "dead" whose agent number is passed. This involves
+    # surgically removing it from the graph, adding it to the "dead" list,
+    # adjusting the agent-to-node mappings, and deleting it from the list of
+    # last-frame's plot coordinates.
     function kill_agent(dying_agent)
         global graph, dead, AN, locs_x, locs_y
         dying_node = AN[dying_agent]
@@ -74,8 +75,8 @@ function specnet(params)
             (a==dying_agent ? Nothing :
                 (AN[a] == nv(graph) ? AN[dying_agent] : AN[a]))
             for (a,n) in AN)
-        # TODO: the rem_vertices!() function that Simon Schoelly wrote returns a
-        # map of old-to-new node numbers, and might be safer.
+        # TODO: the rem_vertices!() function that Simon Schoelly wrote returns
+        # a map of old-to-new node numbers, and might be safer.
         rem_vertex!(graph, dying_node)
         pop!(AN,dying_agent)
     end
@@ -83,8 +84,8 @@ function specnet(params)
     # Return true if the agent is a member of any proto institution.
     in_proto(agent) = any(agent in proto for proto in protos)
 
-    # Return true if the agent is a rich enough to joing a proto, and available to
-    # do so.
+    # Return true if the agent is a rich enough to joing a proto, and available
+    # to do so.
     function eligible_for_proto(agent)
         return wealths[agent] > proto_threshold && !in_proto(agent)
     end
@@ -98,8 +99,8 @@ function specnet(params)
     function assert_no_dead_neighbors(graph, agent, dead)
         node = AN[agent]
         if intersect(
-            Set(map(node->[ a for a in keys(AN) if AN[a] == node ][1],neighbors(graph, node))),
-                dead) != Set()
+            Set(map(node->[ a for a in keys(AN) if AN[a] == node ][1],
+                neighbors(graph, node))), dead) != Set()
             nodes_to_agents = rev_dict(AN)
             error("Dead neighbor of $(agent)!\n" *
                 "neighbors: $(nodes_to_agents[neighbors(graph, node)]) "*
@@ -111,7 +112,8 @@ function specnet(params)
         global protos, possible_colors, N
         [ in_proto([ a for a in keys(AN) if AN[a] == node ][1]) ?
             possible_colors[
-                findfirst(x -> [ a for a in keys(AN) if AN[a] == node ][1] in x, protos)] :
+                findfirst(x->[ a for a in keys(AN) if AN[a] == node ][1] in x,
+                                                                    protos)] :
                 ([ a for a in keys(AN) if AN[a] == node ][1] in dead ?
                         colorant"pink" : colorant"lightgrey")
         for node in 1:nv(graph) ]
@@ -123,9 +125,9 @@ function specnet(params)
 
     println("Running SPECnet...")
 
-    # A list of proto-institutions, each of which is a set of participating agent
-    # numbers. (Could be a set instead of a list, but we're using it as an index to
-    # the colors array, to uniquely color members of each proto.)
+    # A list of proto-institutions, each of which is a set of participating
+    # agent numbers. (Could be a set instead of a list, but we're using it as
+    # an index to the colors array, to uniquely color members of each proto.)
     global protos = Set{Char}[]
 
     # The numbers of agents who have perished (initially none).
@@ -142,7 +144,8 @@ function specnet(params)
 
     # Agent attributes.
     global wealths = 
-        Dict{Char,Any}(LETTERS[k]=>rand(Float16) * max_starting_wealth for k in 1:N)
+        Dict{Char,Any}(LETTERS[k]=>
+            rand(Float16) * max_starting_wealth for k in 1:N)
 
     global possible_colors = Random.shuffle(ColorSchemes.rainbow.colors)
 
@@ -186,8 +189,8 @@ function specnet(params)
 
         if eligible_for_proto(agent1) && eligible_for_proto(agent2)
             form_proto(agent1, agent2)
-            # Since they're forming a proto, they also become socially connected
-            # (if they weren't already.)
+            # Since they're forming a proto, they also become socially
+            # connected (if they weren't already.)
             if !has_edge(graph, AN[agent1], AN[agent2])
                 add_edge!(graph, AN[agent1], AN[agent1])
             end
@@ -199,7 +202,8 @@ function specnet(params)
 
         labels_to_plot = map(node->[ a for a in keys(AN) if AN[a] == node ][1],
             1:length(AN))
-        wealths_to_plot = map(node->wealths[[ a for a in keys(AN) if AN[a] == node ][1]],
+        wealths_to_plot = map(
+            node->wealths[[ a for a in keys(AN) if AN[a] == node ][1]],
             1:length(AN))
         plot = gplot(graph,
             layout=remember_layout,
@@ -212,19 +216,21 @@ function specnet(params)
             nodestrokelw=.5,
             nodefillc=colors)
         draw(PNG("$(tempdir())/output$(lpad(string(iter),3,'0')).png"), plot)
-       #iteration label for svg files
-       if make_anim
-            run(`mogrify -format svg -gravity South  -pointsize 15 -annotate 0 "Iteration $(iter) of $(num_iter)"  $(tempdir())\output$(lpad(string(iter),3,'0')).png`)
+        #iteration label for svg files
+        if make_anim
+            run(`mogrify -format svg -gravity South -pointsize 15 -annotate 0 "Iteration $(iter) of $(num_iter)"  $(tempdir())/output$(lpad(string(iter),3,'0')).png`)
         end
         # Payday!
-        [ wealths[k] += (rand(Float16) - .5) * salary_range for k in keys(wealths) ]
+        [ wealths[k] += (rand(Float16) - .5) * salary_range 
+            for k in keys(wealths) ]
         for d in dead
             wealths[d] = -500
         end
         [ wealths[k] += in_proto(k) ? rand(Float16)*10 : 0
             for k in keys(wealths) ]
 
-        dying_agents = [ k for k in keys(wealths) if wealths[k] < 0 && !(k in dead) ]
+        dying_agents = 
+            [ k for k in keys(wealths) if wealths[k] < 0 && !(k in dead) ]
         for dying_agent in dying_agents
             prd("Agent $(dying_agent) died!")
             kill_agent(dying_agent)
@@ -233,7 +239,8 @@ function specnet(params)
 
     if make_anim
         println("Building animation...")
-      # unlabeled version- run(`mogrify -format svg $(tempdir())/output"*".png`)
+        # unlabeled version- run(`mogrify -format svg
+        # $(tempdir())/output"*".png`)
         run(`convert -delay $(animation_delay) $(tempdir())/output"*".svg $(tempdir())/output.gif`)
     end
 
