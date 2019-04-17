@@ -60,7 +60,7 @@ function specnet(params)
     # adjusting the agent-to-node mappings, and deleting it from the list of
     # last-frame's plot coordinates.
     function kill_agent(dying_agent)
-        global graph, dead, AN, locs_x, locs_y
+        global graph, dead, AN, locs_x, locs_y, wealths
         dying_node = AN[dying_agent]
         deleteat!(locs_x, dying_node)
         deleteat!(locs_y, dying_node)
@@ -79,6 +79,7 @@ function specnet(params)
         # a map of old-to-new node numbers, and might be safer.
         rem_vertex!(graph, dying_node)
         pop!(AN,dying_agent)
+        pop!(wealths,dying_agent)
     end
 
     # Return true if the agent is a member of any proto institution.
@@ -223,9 +224,6 @@ function specnet(params)
         # Payday!
         [ wealths[k] += (rand(Float16) - .5) * salary_range 
             for k in keys(wealths) ]
-        for d in dead
-            wealths[d] = -500
-        end
         [ wealths[k] += in_proto(k) ? rand(Float16)*10 : 0
             for k in keys(wealths) ]
 
