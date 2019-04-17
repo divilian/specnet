@@ -152,7 +152,8 @@ function specnet(params)
 
 
     # (Erase old images.)
-    run(`rm -f $(tempdir())/output"*".png $(tempdir())/output"*".svg`)
+    run(`rm -f $(tempdir())/graph"*".png $(tempdir())/graph"*".svg`)
+    run(`rm -f $(tempdir())/wealth"*".png $(tempdir())/wealth"*".svg`)
 
     locs_x, locs_y = nothing, nothing
 
@@ -197,6 +198,7 @@ function specnet(params)
             end
         end
 
+        # Plot graph for this iteration.
         colors = compute_colors()
 
         remember_layout = x -> spring_layout(x, locs_x, locs_y)
@@ -206,7 +208,7 @@ function specnet(params)
         wealths_to_plot = map(
             node->wealths[[ a for a in keys(AN) if AN[a] == node ][1]],
             1:length(AN))
-        plot = gplot(graph,
+        graphp = gplot(graph,
             layout=remember_layout,
             nodelabel=labels_to_plot,
             NODESIZE=.08,
@@ -216,11 +218,28 @@ function specnet(params)
             nodestrokec=colorant"grey",
             nodestrokelw=.5,
             nodefillc=colors)
-        draw(PNG("$(tempdir())/output$(lpad(string(iter),3,'0')).png"), plot)
+        draw(PNG("$(tempdir())/graph$(lpad(string(iter),3,'0')).png"),graphp)
+
+        # Plot wealth histogram for this iteration.
+        wealthp = plot(x=collect(values(wealths)),
+            Geom.histogram(density=true, bincount=20),
+            Guide.xlabel("Wealth"),
+            Guide.ylabel("Density of agents"),
+            Guide.title("Wealth distribution at iteration $(iter)"),
+            # Hard to know what to set the max value to.
+            Scale.x_continuous(minvalue=0,
+                maxvalue=max_starting_wealth*num_iter/10),
+            theme)
+
+        draw(PNG("$(tempdir())/wealth$(lpad(string(iter),3,'0')).png"),wealthp)
+
+
         #iteration label for svg files
         if make_anim
-            run(`mogrify -format svg -gravity South -pointsize 15 -annotate 0 "Iteration $(iter) of $(num_iter)"  $(tempdir())/output$(lpad(string(iter),3,'0')).png`)
+            run(`mogrify -format svg -gravity South -pointsize 15 -annotate 0 "Iteration $(iter) of $(num_iter)"  $(tempdir())/graph$(lpad(string(iter),3,'0')).png`)
+            run(`mogrify -format svg $(tempdir())/wealth$(lpad(string(iter),3,'0')).png`)
         end
+
         # Payday!
         [ wealths[k] += (rand(Float16) - .5) * salary_range 
             for k in keys(wealths) ]
@@ -236,10 +255,11 @@ function specnet(params)
     end
 
     if make_anim
-        println("Building animation...")
+        println("Building animations...")
         # unlabeled version- run(`mogrify -format svg
-        # $(tempdir())/output"*".png`)
-        run(`convert -delay $(animation_delay) $(tempdir())/output"*".svg $(tempdir())/output.gif`)
+        # $(tempdir())/graph"*".png`)
+        run(`convert -delay $(animation_delay) $(tempdir())/graph"*".svg $(tempdir())/graph.gif`)
+        run(`convert -delay $(animation_delay) $(tempdir())/wealth"*".svg $(tempdir())/wealth.gif`)
     end
 
     println("...end SPECnet.")
