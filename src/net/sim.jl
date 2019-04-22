@@ -180,8 +180,10 @@ function specnet(params)
 
 
     # (Erase old images.)
-    run(`rm -f $(tempdir())/graph"*".png $(tempdir())/graph"*".svg`)
-    run(`rm -f $(tempdir())/wealth"*".png $(tempdir())/wealth"*".svg`)
+    rm("$(tempdir())/graph"*".png", force=true)
+    rm("$(tempdir())/graph"*".svg", force=true)
+    rm("$(tempdir())/wealth"*".png", force=true)
+    rm("$(tempdir())/wealth"*".svg", force=true)
 
     locs_x, locs_y = nothing, nothing
 
@@ -276,8 +278,8 @@ function specnet(params)
 
         #iteration label for svg files
         if make_anim
-            run(`mogrify -format svg -gravity South -pointsize 15 -annotate 0 "Iteration $(iter) of $(num_iter)"  $(tempdir())/graph$(lpad(string(iter),3,'0')).png`)
-            run(`mogrify -format svg $(tempdir())/wealth$(lpad(string(iter),3,'0')).png`)
+            run(`mogrify -format svg -gravity South -pointsize 15 -annotate 0 "Iteration $(iter) of $(num_iter)"  $(joinpath(tempdir(),"graph"))$(lpad(string(iter),3,'0')).png`)
+            run(`mogrify -format svg $(joinpath(tempdir(),"wealth"))$(lpad(string(iter),3,'0')).png`)
         end
 
         # Payday!
@@ -296,9 +298,9 @@ function specnet(params)
 
     if make_anim
         println("Building wealth animation (be unbelievably patient)...")
-        run(`convert -delay $(animation_delay) $(tempdir())/wealth"*".svg $(tempdir())/wealth.gif`)
+        run(`convert -delay $(animation_delay) $(joinpath(tempdir(),"wealth"))"*".svg $(joinpath(tempdir(),"wealth.gif"))`)
         println("Building graph animation (be mind-bogglingly patient)...")
-        run(`convert -delay $(animation_delay) $(tempdir())/graph"*".svg $(tempdir())/graph.gif`)
+        run(`convert -delay $(animation_delay) $(joinpath(tempdir(),"graph"))"*".svg $(joinpath(tempdir(),"graph.gif"))`)
     end
 
     println("...end SPECnet.")
