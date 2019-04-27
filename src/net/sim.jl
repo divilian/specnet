@@ -186,7 +186,7 @@ function specnet(params)
     rm("$(tempdir())/graph"*".svg", force=true)
     rm("$(tempdir())/wealth"*".png", force=true)
     rm("$(tempdir())/wealth"*".svg", force=true)
-
+    rm("$(tempdir())/GiniPlot.png", force=true)
     locs_x, locs_y = nothing, nothing
 
     println("Iterations:")
@@ -298,7 +298,7 @@ function specnet(params)
         end
    #adding current gini index to ginis array
         wealthArray=[]
-
+        empty!(wealthArray)
        for k in keys(wealths)
           if wealths[k]>=-400
              push!(wealthArray,wealths[k])

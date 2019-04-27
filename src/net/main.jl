@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-#using RCall 
-#@rlibrary ineq
+using RCall 
+@rlibrary ineq
 using sim
 
 ## Input parameters
