@@ -7,6 +7,7 @@ using ColorSchemes, Colors
 using Misc
 using Random
 using Cairo, Fontconfig
+using DataFrames
 
 export specnet
 
@@ -295,6 +296,12 @@ function specnet(params)
             kill_agent(dying_agent)
         end
     end
+
+    # Collect results in DataFrame.
+    results = DataFrame(
+        agent = collect(keys(wealths)),
+        wealth = collect(values(wealths))
+    )
 
     if make_anim
         println("Building wealth animation (be unbelievably patient)...")
