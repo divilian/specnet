@@ -1,5 +1,6 @@
 module sim
-
+using RCall
+@rlibrary ineq
 using Gadfly
 using LightGraphs
 using GraphPlot, Compose
@@ -148,18 +149,19 @@ function specnet(params)
                         colorant"pink" : colorant"lightgrey")
         for node in 1:nv(graph) ]
     end
-
+   ginis=[]
     rev_dict(d) = Dict(y=>x for (x,y) in d)
     ###########################################################################
 
 
-    println("Running SPECnet...")
+    println("Run SPECnet...")
+
 
     # A list of proto-institutions, each of which is a set of participating
     # agent numbers. (Could be a set instead of a list, but we're using it as
     # an index to the colors array, to uniquely color members of each proto.)
     global protos = Set{Char}[]
-
+ 
     # The numbers of agents who have perished (initially none).
     global dead = Set{Char}()
 
@@ -185,7 +187,7 @@ function specnet(params)
     rm("$(tempdir())/graph"*".svg", force=true)
     rm("$(tempdir())/wealth"*".png", force=true)
     rm("$(tempdir())/wealth"*".svg", force=true)
-
+    rm("$(tempdir())/GiniPlot.png", force=true)
     locs_x, locs_y = nothing, nothing
 
     println("Iterations:")
@@ -304,13 +306,35 @@ function specnet(params)
     )
 
     if make_anim
+   #adding current gini index to ginis array
+        wealthArray=[]
+        empty!(wealthArray)
+       for k in keys(wealths)
+          if wealths[k]>=-400
+             push!(wealthArray,wealths[k])
+          end
+       end
+	   cGini=ineq(wealthArray, type="Gini")
+	
+          gIndex=convert(Float16,cGini)	   
+          push!(ginis,gIndex)
+   end
+#drawing the gini index plot
+    println("a")
+   giniPlot=plot(x=1:num_iter,y=ginis, Geom.point, Geom.line, Guide.xlabel("Iteration"), Guide.ylabel("Gini Index"))
+    println("b")
+    println("giniPlot = $(giniPlot)")
+   draw(PNG("$(tempdir())/GiniPlot.png"), giniPlot)
+    println("c")
+    
+   if make_anim
         println("Building wealth animation (be unbelievably patient)...")
         run(`convert -delay $(animation_delay) $(joinpath(tempdir(),"wealth"))"*".svg $(joinpath(tempdir(),"wealth.gif"))`)
         println("Building graph animation (be mind-bogglingly patient)...")
         run(`convert -delay $(animation_delay) $(joinpath(tempdir(),"graph"))"*".svg $(joinpath(tempdir(),"graph.gif"))`)
     end
 
-    println("...end SPECnet.")
+    println("...ending SPECnet.")
 end
 
 end
