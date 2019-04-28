@@ -194,7 +194,7 @@ function specnet(params)
 
     for iter in 1:num_iter
 
-    nodes_to_agents = rev_dict(AN)
+        nodes_to_agents = rev_dict(AN)
 
         if iter % 10 == 0 println(iter) else print(".") end
 
@@ -237,11 +237,11 @@ function specnet(params)
 	            join_proto(agent2,current_proto)
 	        end
 
-           if in_proto(agent2)&&!in_proto(agent1)
-	                current_proto=get_proto(agent2)
-	                join_proto(agent1,current_proto)
+            if in_proto(agent2)&&!in_proto(agent1)
+	            current_proto=get_proto(agent2)
+	            join_proto(agent1,current_proto)
 	        end
-	end
+	    end
 
         # Plot graph for this iteration.
         colors = compute_colors()
@@ -297,7 +297,21 @@ function specnet(params)
             prd("Agent $(dying_agent) died!")
             kill_agent(dying_agent)
         end
-    end
+    
+        #adding current gini index to ginis array
+        wealthArray=[]
+        empty!(wealthArray)
+        for k in keys(wealths)
+            if wealths[k]>=-400
+                push!(wealthArray,wealths[k])
+            end
+        end
+        cGini=ineq(wealthArray, type="Gini")
+
+        gIndex=convert(Float16,cGini)	   
+        push!(ginis,gIndex)
+
+    end   # End main simulation for loop
 
     # Collect results in DataFrame.
     results = DataFrame(
@@ -305,29 +319,11 @@ function specnet(params)
         wealth = collect(values(wealths))
     )
 
-    if make_anim
-   #adding current gini index to ginis array
-        wealthArray=[]
-        empty!(wealthArray)
-       for k in keys(wealths)
-          if wealths[k]>=-400
-             push!(wealthArray,wealths[k])
-          end
-       end
-	   cGini=ineq(wealthArray, type="Gini")
-	
-          gIndex=convert(Float16,cGini)	   
-          push!(ginis,gIndex)
-   end
-#drawing the gini index plot
-    println("a")
-   giniPlot=plot(x=1:num_iter,y=ginis, Geom.point, Geom.line, Guide.xlabel("Iteration"), Guide.ylabel("Gini Index"))
-    println("b")
-    println("giniPlot = $(giniPlot)")
-   draw(PNG("$(tempdir())/GiniPlot.png"), giniPlot)
-    println("c")
+    #drawing the gini index plot
+    giniPlot=plot(x=1:num_iter,y=ginis, Geom.point, Geom.line, Guide.xlabel("Iteration"), Guide.ylabel("Gini Index"))
+    draw(PNG("$(tempdir())/GiniPlot.png"), giniPlot)
     
-   if make_anim
+    if make_anim
         println("Building wealth animation (be unbelievably patient)...")
         run(`convert -delay $(animation_delay) $(joinpath(tempdir(),"wealth"))"*".svg $(joinpath(tempdir(),"wealth.gif"))`)
         println("Building graph animation (be mind-bogglingly patient)...")
@@ -338,3 +334,4 @@ function specnet(params)
 end
 
 end
+
