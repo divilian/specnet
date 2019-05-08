@@ -1,4 +1,5 @@
 #!/usr/bin/env julia
+using Revise
 using RCall 
 @rlibrary ineq
 using sim
